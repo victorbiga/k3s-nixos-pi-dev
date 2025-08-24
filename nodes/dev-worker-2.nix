@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let
   k3sConfig = import ../shared/k3s-config.nix {
@@ -10,11 +10,10 @@ in
   imports = [ k3sConfig ];
 
   config = {
-
     networking = {
-      hostName = "kube-node-6";
+      hostName = "dev-worker-2";
       interfaces.end0.ipv4.addresses = [{
-        address = "10.0.0.26";
+        address = "10.0.0.35";
         prefixLength = 24;
       }];
     };

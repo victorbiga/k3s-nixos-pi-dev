@@ -3,7 +3,7 @@
 let
   k3sConfig = import ../shared/k3s-config.nix {
     inherit pkgs;
-    role = "agent";
+    role = "server";
   };
 in
 {
@@ -12,9 +12,9 @@ in
   config = {
 
     networking = {
-      hostName = "kube-node-5";
+      hostName = "dev";
       interfaces.end0.ipv4.addresses = [{
-        address = "10.0.0.25";
+        address = "10.0.0.32";
         prefixLength = 24;
       }];
     };

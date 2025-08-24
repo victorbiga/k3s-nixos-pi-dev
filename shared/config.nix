@@ -51,7 +51,7 @@
     stateVersion = "24.05";
     autoUpgrade = {
       enable = true;
-      flake = "github:victorbiga/k3s-nixos-pi";
+      flake = "github:victorbiga/k3s-nixos-pi-dev";
       dates = "11:00";
     };
   };
