@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nodeName: ${{ github.event.inputs.nodeNames }}
+        nodeName: ${{ fromJSON(github.event.inputs.nodeNames) }}
     steps:
       - uses: actions/checkout@v4
 
