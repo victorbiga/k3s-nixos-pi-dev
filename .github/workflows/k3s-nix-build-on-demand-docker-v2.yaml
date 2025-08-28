@@ -20,19 +20,34 @@ on:
         default: false
 
 jobs:
+  setup:
+    name: Setup node matrix
+    runs-on: ubuntu-latest
+    outputs:
+      nodes: ${{ steps.set-nodes.outputs.nodes }}
+    steps:
+      - id: set-nodes
+        run: |
+          nodes="[]"
+          if ${{ github.event.inputs.dev }}; then
+            nodes=$(echo $nodes | jq '. + ["dev"]')
+          fi
+          if ${{ github.event.inputs.dev-worker-1 }}; then
+            nodes=$(echo $nodes | jq '. + ["dev-worker-1"]')
+          fi
+          if ${{ github.event.inputs.dev-worker-2 }}; then
+            nodes=$(echo $nodes | jq '. + ["dev-worker-2"]')
+          fi
+          echo "nodes=$nodes" >> $GITHUB_OUTPUT
+
   build-node-image:
-    name: Build node image
+    name: Build ${{ matrix.nodeName }} image
+    needs: setup
+    if: fromJson(needs.setup.outputs.nodes)[0] != null
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nodeName:
-          - dev
-          - dev-worker-1
-          - dev-worker-2
-    if: >
-      (matrix.nodeName == 'dev' && github.event.inputs.dev) ||
-      (matrix.nodeName == 'dev-worker-1' && github.event.inputs.dev-worker-1) ||
-      (matrix.nodeName == 'dev-worker-2' && github.event.inputs.dev-worker-2)
+        nodeName: ${{ fromJson(needs.setup.outputs.nodes) }}
     steps:
       - uses: actions/checkout@v4
 
