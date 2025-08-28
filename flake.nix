@@ -47,6 +47,6 @@
             nodeConfig = ./nodes/dev-worker-3.nix;
             rpiVersion = "rpi4";
           };
-    };
-  };
+        };
+      });
 }
