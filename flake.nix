@@ -43,6 +43,10 @@
             nodeConfig = ./nodes/dev-worker-2.nix;
             rpiVersion = "rpi4";
           };
+          dev-worker-3 = mkNode {
+            nodeConfig = ./nodes/dev-worker-3.nix;
+            rpiVersion = "rpi4";
+          };
     };
   };
 }

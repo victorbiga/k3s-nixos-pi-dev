@@ -18,6 +18,11 @@ on:
         description: 'Build dev-worker-2 node'
         required: true
         default: false
+      dev-worker-3:
+        type: boolean
+        description: 'Build dev-worker-3 node'
+        required: true
+        default: false
 
 jobs:
   setup:
@@ -27,17 +32,19 @@ jobs:
       nodes: ${{ steps.set-nodes.outputs.nodes }}
     steps:
       - id: set-nodes
+        env:
+          DEV: ${{ github.event.inputs.dev }}
+          DEV_WORKER_1: ${{ github.event.inputs.dev-worker-1 }}
+          DEV_WORKER_2: ${{ github.event.inputs.dev-worker-2 }}
+          DEV_WORKER_3: ${{ github.event.inputs.dev-worker-3 }}
         run: |
-          nodes="[]"
-          if ${{ github.event.inputs.dev }}; then
-            nodes=$(echo $nodes | jq '. + ["dev"]')
-          fi
-          if ${{ github.event.inputs.dev-worker-1 }}; then
-            nodes=$(echo $nodes | jq '. + ["dev-worker-1"]')
-          fi
-          if ${{ github.event.inputs.dev-worker-2 }}; then
-            nodes=$(echo $nodes | jq '. + ["dev-worker-2"]')
-          fi
+          nodes=$(jq -n \
+            [] \
+            | if env.DEV == "true" then . + ["dev"] else . end \
+            | if env.DEV_WORKER_1 == "true" then . + ["dev-worker-1"] else . end \
+            | if env.DEV_WORKER_2 == "true" then . + ["dev-worker-2"] else . end \
+            | if env.DEV_WORKER_3 == "true" then . + ["dev-worker-3"] else . end \
+          )
           echo "nodes=$nodes" >> $GITHUB_OUTPUT
 
   build-node-image:
