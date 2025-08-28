@@ -24,8 +24,8 @@ in
   hardware.raspberry-pi.fkms-3d.enable = true;
 
   # Conditionally import settings based on Raspberry Pi version
-  imports = [
-    (lib.mkIf (rpiVersion == "bcm2711") ./rpi4.nix)
-    (lib.mkIf (rpiVersion == "bcm2712") ./rpi5.nix)
-  ];
+  imports =
+    if rpiVersion == "bcm2711" then [ ./rpi4.nix ]
+    else if rpiVersion == "bcm2712" then [ ./rpi5.nix ]
+    else [];
 }
