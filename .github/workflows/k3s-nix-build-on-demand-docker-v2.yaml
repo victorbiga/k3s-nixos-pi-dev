@@ -38,7 +38,7 @@ jobs:
           DEV_WORKER_2: ${{ github.event.inputs.dev-worker-2 }}
           DEV_WORKER_3: ${{ github.event.inputs.dev-worker-3 }}
         run: |
-          nodes=$(jq -n '
+          nodes=$(jq -cn '
             []
             | if env.DEV == "true" then . + ["dev"] else . end
             | if env.DEV_WORKER_1 == "true" then . + ["dev-worker-1"] else . end
