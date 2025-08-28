@@ -3,15 +3,21 @@ name: k3s-nix-build-on-demand-docker-v2
 on:
   workflow_dispatch:
     inputs:
-      nodeNames:
-        type: choice
+      dev:
+        type: boolean
+        description: 'Build dev node'
         required: true
-        description: Choose which nodes to build
-        options:
-          - dev
-          - dev-worker-1
-          - dev-worker-2
-        multiple: true
+        default: true
+      dev-worker-1:
+        type: boolean
+        description: 'Build dev-worker-1 node'
+        required: true
+        default: false
+      dev-worker-2:
+        type: boolean
+        description: 'Build dev-worker-2 node'
+        required: true
+        default: false
 
 jobs:
   build-node-image:
@@ -19,7 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nodeName: ${{ fromJSON(github.event.inputs.nodeNames) }}
+        nodeName:
+          - dev
+          - dev-worker-1
+          - dev-worker-2
+    if: >
+      (matrix.nodeName == 'dev' && github.event.inputs.dev) ||
+      (matrix.nodeName == 'dev-worker-1' && github.event.inputs.dev-worker-1) ||
+      (matrix.nodeName == 'dev-worker-2' && github.event.inputs.dev-worker-2)
     steps:
       - uses: actions/checkout@v4
 
