@@ -38,13 +38,13 @@ jobs:
           DEV_WORKER_2: ${{ github.event.inputs.dev-worker-2 }}
           DEV_WORKER_3: ${{ github.event.inputs.dev-worker-3 }}
         run: |
-          nodes=$(jq -n \
-            [] \
-            | if env.DEV == "true" then . + ["dev"] else . end \
-            | if env.DEV_WORKER_1 == "true" then . + ["dev-worker-1"] else . end \
-            | if env.DEV_WORKER_2 == "true" then . + ["dev-worker-2"] else . end \
-            | if env.DEV_WORKER_3 == "true" then . + ["dev-worker-3"] else . end \
-          )
+          nodes=$(jq -n '
+            []
+            | if env.DEV == "true" then . + ["dev"] else . end
+            | if env.DEV_WORKER_1 == "true" then . + ["dev-worker-1"] else . end
+            | if env.DEV_WORKER_2 == "true" then . + ["dev-worker-2"] else . end
+            | if env.DEV_WORKER_3 == "true" then . + ["dev-worker-3"] else . end
+          ')
           echo "nodes=$nodes" >> $GITHUB_OUTPUT
 
   build-node-image:
