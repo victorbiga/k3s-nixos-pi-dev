@@ -13,7 +13,11 @@ COPY shared/ ./shared/
 COPY nodes/ ./nodes/
 
 # Build the SD image
-RUN nix --extra-experimental-features nix-command --extra-experimental-features flakes build ".#nixosConfigurations.${NODE_NAME}.config.system.build.sdImage"
+RUN nix \
+    --option filter-syscalls false \
+    --extra-experimental-features nix-command \
+    --extra-experimental-features flakes \
+    build ".#nixosConfigurations.${NODE_NAME}.config.system.build.sdImage"
 
 # --- Final Stage ---
 FROM nixos/nix
