@@ -1,4 +1,4 @@
-FROM nixos/nix as builder
+FROM nixos/nix AS builder
 
 WORKDIR /sd-image
 
@@ -25,8 +25,8 @@ FROM nixos/nix
 WORKDIR /sd-image
 
 # Copy the built image and the entrypoint script from the builder stage
-COPY --from=builder /sd-image/result ./
-COPY entrypoint.sh .
+COPY --from=builder /sd-image/result/. ./
+COPY entrypoint1.sh .
 
 # Set the entrypoint
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./entrypoint1.sh"]

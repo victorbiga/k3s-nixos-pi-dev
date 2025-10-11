@@ -34,9 +34,11 @@
 
     nixosConfigurations = {
       # Node configurations using the mkNode helper function
+      management-prod = self.mkNode5 ./nodes/management-prod.nix;
       dev = self.mkNode5 ./nodes/dev.nix;
       dev-worker-1 = self.mkNode5 ./nodes/dev-worker-1.nix;
       dev-worker-2 = self.mkNode4 ./nodes/dev-worker-2.nix;
+      prod = self.mkNode5 ./nodes/prod.nix;
     };
   };
 }
