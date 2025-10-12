@@ -2,7 +2,7 @@
   description = "NixOS Raspberry Pi configuration flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/master";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     raspberry-pi-nix.url = "github:nix-community/raspberry-pi-nix";
   };
