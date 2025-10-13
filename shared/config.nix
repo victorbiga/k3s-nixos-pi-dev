@@ -77,6 +77,7 @@
       libraspberrypi
       htop
       fzf
+      oh-my-posh
     ];
 
     variables.PATH = [
