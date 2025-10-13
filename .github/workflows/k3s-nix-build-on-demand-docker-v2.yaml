@@ -46,48 +46,74 @@ jobs:
             | if env.DEV_WORKER_3 == "true" then . + ["dev-worker-3"] else . end
           ')
           echo "nodes=$nodes" >> $GITHUB_OUTPUT
+build-node-image:
+    name: Build ${{ matrix.nodeName }} image
+    needs: setup
+    if: fromJson(needs.setup.outputs.nodes)[0] != null
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        nodeName: ${{ fromJson(needs.setup.outputs.nodes) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-  build-node-image:
-    name: Build ${{ matrix.nodeName }} image
-    needs: setup
-    if: fromJson(needs.setup.outputs.nodes)[0] != null
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        nodeName: ${{ fromJson(needs.setup.outputs.nodes) }}
-    steps:
-      - uses: actions/checkout@v5
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Build and push Docker image
+        # ... (Your existing build-push-action) ...
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          build-args: |
+            NODE_NAME=${{ matrix.nodeName }}
+          tags: k3s-nixos-pi:${{ matrix.nodeName }}
+          cache-from: type=gha,scope=${{ github.workflow }}
+          cache-to: type=gha,scope=${{ github.workflow }},mode=max
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Run container and extract path and filename
+        id: extract-info
+        run: |
+          # 1. Run the container and capture output
+          OUTPUT=$(docker run --rm k3s-nixos-pi:${{ matrix.nodeName }})
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/arm64
-          build-args: |
-            NODE_NAME=${{ matrix.nodeName }}
-          tags: k3s-nixos-pi:${{ matrix.nodeName }}
-          cache-from: type=gha,scope=${{ github.workflow }}
-          cache-to: type=gha,scope=${{ github.workflow }},mode=max
+          # 2. Extract the full dynamic path from the 'docker cp' line
+          IMAGE_PATH=$(echo "$OUTPUT" | \
+            grep 'docker cp' | \
+            sed -E 's/docker cp [0-9a-f]+:(.*) \./\1/' | \
+            tr -d '\n')
+          
+          # 3. Extract the dynamic filename from the path
+          FILENAME=$(basename "$IMAGE_PATH")
 
-      - name: Run container
-        run: docker run -d --name my-container k3s-nixos-pi:${{ matrix.nodeName }}
+          echo "::notice file=extract.sh::Found image path: $IMAGE_PATH"
+          echo "IMAGE_PATH=$IMAGE_PATH" >> $GITHUB_OUTPUT
+          echo "FILENAME=$FILENAME" >> $GITHUB_OUTPUT # Export the dynamic filename
 
-      - name: Extract image
-        run: |
-          docker cp my-container:/sd-image/result/sd-image/nixos-sd-image-23.11-aarch64-linux.img.zst .
+      - name: Start container for copying
+        run: docker run -d --name my-container k3s-nixos-pi:${{ matrix.nodeName }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sd-image-${{ matrix.nodeName }}.img.zst
-          path: nixos-sd-image-23.11-aarch64-linux.img.zst
+      - name: Extract image using dynamic path
+        run: |
+          # Use the full path for the copy
+          docker cp my-container:${{ steps.extract-info.outputs.IMAGE_PATH }} .
+          # Rename the file to ensure the artifact name is clean and consistent
+          mv ${{ steps.extract-info.outputs.FILENAME }} sd-image.img.zst
 
-      - name: Stop container
-        if: always()
-        run: docker stop my-container || true
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Use a consistent, descriptive name for the artifact
+          name: sd-image-${{ matrix.nodeName }}-${{ steps.extract-info.outputs.FILENAME }}
+          # Use a static local path since we just renamed the file
+          path: sd-image.img.zst
+
+      - name: Stop container
+        if: always()
+        run: docker stop my-container || true
+
