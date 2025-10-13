@@ -90,10 +90,9 @@
       enable = true;
       enableCompletion = true;
       syntaxHighlighting.enable = true;
-      ohMyZsh = {
-        enable = true;
-        plugins = [ "fzf" ];
-      };
+      promptInit = ''
+        eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh init zsh --config ${../cluster.omp.json})"
+      '';
     };
     neovim = {
       defaultEditor = true;
