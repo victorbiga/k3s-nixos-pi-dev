@@ -91,8 +91,14 @@
       enable = true;
       enableCompletion = true;
       syntaxHighlighting.enable = true;
+      initExtra = ''
+        if [ -f /etc/zshrc ]; then
+          source /etc/zshrc
+        fi
+      '';
       promptInit = ''
         eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh init zsh --config ${../cluster.omp.json})"
+        eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh completion zsh --config ${../cluster.omp.json})"
       '';
     };
     neovim = {
