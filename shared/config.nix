@@ -54,6 +54,7 @@
       flake = "github:victorbiga/k3s-nixos-pi-dev";
       dates = "11:00";
     };
+    userActivationScripts.zshrc = "teval "$(${pkgs.oh-my-posh}/bin/oh-my-posh completion zsh > "$HOME/.zshrc";
   };
 
   # Networking
@@ -93,7 +94,6 @@
       syntaxHighlighting.enable = true;
       promptInit = ''
         eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh init zsh --config ${../cluster.omp.json})"
-        eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh completion zsh > "$HOME/.zshrc
       '';
     };
     neovim = {
