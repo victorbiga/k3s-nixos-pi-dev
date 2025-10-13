@@ -93,7 +93,7 @@
       syntaxHighlighting.enable = true;
       promptInit = ''
         eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh init zsh --config ${../cluster.omp.json})"
-        eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh init zsh > "$HOME/.zshrc
+        eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh completion zsh > "$HOME/.zshrc
       '';
     };
     neovim = {
