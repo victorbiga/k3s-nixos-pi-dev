@@ -98,9 +98,7 @@
       '';
       promptInit = ''
         eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh init zsh --config ${../cluster.omp.json})"
-        if [ "$(basename "$SHELL")" = "zsh" ]; then
-          if [ -f /etc/zshrc ]; then
-              ln -sf /etc/zshrc "$HOME/.zshrc"
+        ln -sf /etc/zshrc "$HOME/.zshrc
       '';
     };
     neovim = {
