@@ -54,7 +54,7 @@
       flake = "github:victorbiga/k3s-nixos-pi-dev";
       dates = "11:00";
     };
-    userActivationScripts.zshrc = "eval "$(${pkgs.oh-my-posh}/bin/oh-my-posh completion zsh > "$HOME/.zshrc";
+    userActivationScripts.zshrc = "eval ${pkgs.oh-my-posh}/bin/oh-my-posh completion zsh > "$HOME/.zshrc";
   };
 
   # Networking
