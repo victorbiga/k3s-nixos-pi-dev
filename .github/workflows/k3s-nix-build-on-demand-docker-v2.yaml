@@ -3,6 +3,7 @@ name: k3s-nix-build-on-demand-docker-v2
 on:
   workflow_dispatch:
     inputs:
+      # --- DEV NODES ---
       dev:
         type: boolean
         description: 'Build dev node'
@@ -23,9 +24,15 @@ on:
         description: 'Build dev-worker-3 node'
         required: true
         default: false
+      # --- NEW PROD NODES ---
       management-prod:
         type: boolean
         description: 'Build management-prod node'
+        required: true
+        default: false
+      prod:
+        type: boolean
+        description: 'Build prod node'
         required: true
         default: false
 
@@ -42,14 +49,21 @@ jobs:
           DEV_WORKER_1: ${{ github.event.inputs.dev-worker-1 }}
           DEV_WORKER_2: ${{ github.event.inputs.dev-worker-2 }}
           DEV_WORKER_3: ${{ github.event.inputs.dev-worker-3 }}
+          # --- NEW PROD ENVS ---
+          MANAGEMENT_PROD: ${{ github.event.inputs.management-prod }}
+          PROD: ${{ github.event.inputs.prod }}
         run: |
           # Use jq to build the JSON array of nodes to build
           nodes=$(jq -cn '
             []
+            # DEV NODES
             | if env.DEV == "true" then . + ["dev"] else . end
             | if env.DEV_WORKER_1 == "true" then . + ["dev-worker-1"] else . end
             | if env.DEV_WORKER_2 == "true" then . + ["dev-worker-2"] else . end
             | if env.DEV_WORKER_3 == "true" then . + ["dev-worker-3"] else . end
+            # NEW PROD NODES
+            | if env.MANAGEMENT_PROD == "true" then . + ["management-prod"] else . end
+            | if env.PROD == "true" then . + ["prod"] else . end
           ')
           echo "nodes=$nodes" >> $GITHUB_OUTPUT
 
@@ -76,7 +90,6 @@ jobs:
         with:
           context: .
           platforms: linux/arm64
-          # This build-arg is crucial for the Dockerfile build
           build-args: |
             NODE_NAME=${{ matrix.nodeName }}
           tags: k3s-nixos-pi:${{ matrix.nodeName }}
@@ -90,7 +103,6 @@ jobs:
           OUTPUT=$(docker run --rm k3s-nixos-pi:${{ matrix.nodeName }})
 
           # 2. Extract the full dynamic Nix store path from the 'docker cp' line
-          # The regex captures everything between the container ID/hostname and the trailing ' .'
           IMAGE_PATH=$(echo "$OUTPUT" | \
             grep 'docker cp' | \
             sed -E 's/docker cp [0-9a-f]+:(.*) \./\1/' | \
@@ -106,7 +118,7 @@ jobs:
           echo "FILENAME=$FILENAME" >> $GITHUB_OUTPUT
 
       - name: Start container for copying
-        # We start a new container instance to perform the 'docker cp' on it
+        # We need a running container instance to perform the 'docker cp' on it.
         run: docker run -d --name my-container k3s-nixos-pi:${{ matrix.nodeName }}
 
       - name: Extract image using dynamic path
@@ -125,4 +137,6 @@ jobs:
           # Upload the file from the static name we renamed it to
           path: sd-image.img.zst
 
-      - name: Stop
+      - name: Stop container
+        if: always() # Ensure this runs even if previous steps fail
+        run: docker stop my-container || true
