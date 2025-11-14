@@ -78,6 +78,7 @@
       htop
       fzf
       oh-my-posh
+      jq
     ];
 
     variables.PATH = [
