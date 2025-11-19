@@ -130,7 +130,7 @@ jobs:
           mv ${{ steps.extract-info.outputs.FILENAME }} sd-image.img.zst
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           # Use the dynamic filename in the artifact name for clarity
           name: sd-image-${{ matrix.nodeName }}-${{ steps.extract-info.outputs.FILENAME }}
